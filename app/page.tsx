@@ -74,7 +74,6 @@ export default function Home() {
                 <button onClick={() => router.push('/')} className="hover:text-white transition-colors">
                   Home
                 </button>
-                <button className="hover:text-white transition-colors">AI Features</button>
               </nav>
               
               {/* Mobile Menu Button */}
