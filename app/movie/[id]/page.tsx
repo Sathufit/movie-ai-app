@@ -4,6 +4,7 @@ import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
+import type { Metadata } from 'next';
 import {
   ArrowLeft,
   Star,
@@ -32,6 +33,9 @@ import MovieCard from '@/components/MovieCard';
 interface PageProps {
   params: Promise<{ id: string }>;
 }
+
+// This would ideally be in a generateMetadata function for dynamic metadata
+// but since this is a client component, we'll add JSON-LD in the component itself
 
 export default function MovieDetailsPage({ params }: PageProps) {
   const router = useRouter();
@@ -136,8 +140,41 @@ export default function MovieDetailsPage({ params }: PageProps) {
   const director = credits?.crew.find((person) => person.job === 'Director');
   const mainCast = credits?.cast.slice(0, 6) || [];
 
+  // JSON-LD structured data for SEO
+  const movieJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Movie',
+    name: movie.title,
+    description: movie.overview,
+    image: getImageUrl(movie.poster_path, 'w500'),
+    datePublished: movie.release_date,
+    director: director ? {
+      '@type': 'Person',
+      name: director.name,
+    } : undefined,
+    actor: mainCast.map(actor => ({
+      '@type': 'Person',
+      name: actor.name,
+    })),
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: movie.vote_average.toFixed(1),
+      ratingCount: movie.vote_count,
+      bestRating: 10,
+      worstRating: 0,
+    },
+    genre: movie.genres?.map(g => g.name),
+    duration: `PT${movie.runtime}M`,
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-black">
+      {/* JSON-LD for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(movieJsonLd) }}
+      />
+      
       {/* Hero Section with Backdrop */}
       <div className="relative h-[60vh] md:h-[70vh]">
         <div className="absolute inset-0">

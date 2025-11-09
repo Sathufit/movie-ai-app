@@ -67,7 +67,7 @@ export default function Home() {
                   MovieAI
                 </h1>
               </div>
-              <nav className="hidden md:flex gap-6 text-sm text-zinc-400">
+              <nav className="hidden md:flex gap-6 text-sm text-zinc-400" aria-label="Main navigation">
                 <button onClick={() => router.push('/')} className="hover:text-white transition-colors">
                   Home
                 </button>
@@ -79,7 +79,7 @@ export default function Home() {
             </div>
 
             {/* Hero Text */}
-            <div className="max-w-3xl mb-8">
+            <section className="max-w-3xl mb-8">
               <h2 className="text-4xl md:text-6xl font-bold text-white mb-4 leading-tight">
                 Discover Your Next
                 <span className="bg-gradient-to-r from-purple-400 to-red-400 bg-clip-text text-transparent">
@@ -90,7 +90,7 @@ export default function Home() {
               <p className="text-lg md:text-xl text-zinc-400 mb-2">
                 Explore thousands of movies, get AI-powered recommendations, and never miss a great film again.
               </p>
-            </div>
+            </section>
 
             {/* AI Search Bar */}
             <div className="mb-6">
