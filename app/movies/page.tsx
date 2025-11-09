@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Filter, Grid3x3, List, ChevronDown, Star, Calendar, TrendingUp, Film, X } from 'lucide-react';
+import { Filter, Grid3x3, List, ChevronDown, Star, Calendar, TrendingUp, Film, X, ArrowUp } from 'lucide-react';
 import { tmdbApi, Movie } from '@/lib/tmdb';
 import MovieCard from '@/components/MovieCard';
 import { useRouter } from 'next/navigation';
@@ -29,6 +29,15 @@ export default function MoviesPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [minRating, setMinRating] = useState(0);
   const [sortBy, setSortBy] = useState<SortType>('popularity.desc');
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Fetch genres on mount
   useEffect(() => {
@@ -158,7 +167,13 @@ export default function MoviesPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 relative">
+      {/* Grid pattern overlay */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.02]" style={{
+        backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)',
+        backgroundSize: '50px 50px'
+      }} />
+      
       {/* Animated background particles */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
@@ -246,6 +261,21 @@ export default function MoviesPage() {
       </header>
 
       <div className="container mx-auto px-4 py-6 md:py-8 relative">
+        {/* Page Title with count */}
+        <div className="mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">
+            {category === 'popular' && 'Popular Movies'}
+            {category === 'top_rated' && 'Top Rated Movies'}
+            {category === 'now_playing' && 'Now Playing'}
+            {category === 'upcoming' && 'Coming Soon'}
+          </h1>
+          {!loading && movies.length > 0 && (
+            <p className="text-sm text-slate-500">
+              Showing {movies.length} movies • Page {page} of {totalPages}
+            </p>
+          )}
+        </div>
+
         {/* Categories */}
         <div className="flex flex-wrap gap-2 mb-6">
           {categories.map(({ id, label, icon: Icon }) => (
@@ -267,6 +297,38 @@ export default function MoviesPage() {
           ))}
         </div>
 
+        {/* Quick Genre Filters */}
+        {!showFilters && (
+          <div className="mb-6 overflow-x-auto pb-2 -mx-4 px-4" style={{ scrollbarWidth: 'none' }}>
+            <div className="flex gap-2 min-w-max">
+              <span className="text-xs text-slate-500 flex items-center px-2">Quick filters:</span>
+              {[
+                { id: 28, name: 'Action' },
+                { id: 35, name: 'Comedy' },
+                { id: 18, name: 'Drama' },
+                { id: 878, name: 'Sci-Fi' },
+                { id: 27, name: 'Horror' },
+                { id: 10749, name: 'Romance' },
+              ].map((genre) => (
+                <button
+                  key={genre.id}
+                  onClick={() => {
+                    toggleGenre(genre.id);
+                    if (!showFilters) setShowFilters(true);
+                  }}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 whitespace-nowrap ${
+                    selectedGenres.includes(genre.id)
+                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30'
+                      : 'bg-slate-800/80 text-slate-400 hover:bg-slate-700 hover:text-white border border-slate-700'
+                  }`}
+                >
+                  {genre.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Filters Panel */}
         <AnimatePresence>
           {showFilters && (
@@ -279,7 +341,15 @@ export default function MoviesPage() {
             >
               <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl border border-slate-700/50 p-5 shadow-xl shadow-cyan-500/5">
                 <div className="flex items-center justify-between mb-5">
-                  <h3 className="text-lg font-semibold text-white">Filters</h3>
+                  <div>
+                    <h3 className="text-lg font-semibold text-white">Filters</h3>
+                    {(selectedGenres.length > 0 || minRating > 0) && (
+                      <p className="text-xs text-slate-500 mt-1">
+                        {selectedGenres.length} {selectedGenres.length === 1 ? 'genre' : 'genres'}
+                        {minRating > 0 && `, ${minRating}+ stars`}
+                      </p>
+                    )}
+                  </div>
                   {(selectedGenres.length > 0 || minRating > 0) && (
                     <button
                       onClick={clearFilters}
@@ -374,16 +444,31 @@ export default function MoviesPage() {
             </div>
           </div>
         ) : movies.length === 0 ? (
-          <div className="text-center py-16">
-            <Film className="w-12 h-12 text-slate-700 mx-auto mb-3" />
-            <h3 className="text-lg font-semibold text-slate-400 mb-1">No movies found</h3>
-            <p className="text-sm text-slate-600 mb-4">Try adjusting your filters</p>
-            <button
-              onClick={clearFilters}
-              className="px-5 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm rounded-lg transition-all duration-300 shadow-lg shadow-cyan-500/30"
-            >
-              Clear Filters
-            </button>
+          <div className="text-center py-20">
+            <div className="inline-block p-6 bg-slate-900/50 rounded-2xl mb-4">
+              <Film className="w-16 h-16 text-slate-700 mx-auto" />
+            </div>
+            <h3 className="text-xl font-semibold text-white mb-2">No movies found</h3>
+            <p className="text-sm text-slate-500 mb-6 max-w-md mx-auto">
+              We couldn't find any movies matching your filters. Try adjusting your search criteria.
+            </p>
+            <div className="flex flex-wrap gap-3 justify-center">
+              <button
+                onClick={clearFilters}
+                className="px-5 py-2.5 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm font-medium rounded-lg transition-all duration-300 shadow-lg shadow-cyan-500/30"
+              >
+                Clear All Filters
+              </button>
+              <button
+                onClick={() => {
+                  setCategory('popular');
+                  clearFilters();
+                }}
+                className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-white text-sm font-medium rounded-lg transition-colors duration-300"
+              >
+                View Popular Movies
+              </button>
+            </div>
           </div>
         ) : (
           <>
@@ -474,6 +559,17 @@ export default function MoviesPage() {
           </>
         )}
       </div>
+
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="fixed bottom-8 right-8 p-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-full shadow-lg shadow-cyan-500/30 hover:shadow-xl hover:shadow-cyan-500/40 hover:scale-110 transition-all duration-300 z-50 group"
+          aria-label="Scroll to top"
+        >
+          <ArrowUp size={20} className="group-hover:-translate-y-1 transition-transform duration-300" />
+        </button>
+      )}
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import SearchBar from '@/components/SearchBar';
 import AISearchBar from '@/components/AISearchBar';
 import MovieCard from '@/components/MovieCard';
-import { Film, Sparkles, Menu, X } from 'lucide-react';
+import { Film, Sparkles, Menu, X, ArrowUp } from 'lucide-react';
 import { tmdbApi, Movie } from '../lib/tmdb';
 
 export default function Home() {
@@ -14,6 +14,15 @@ export default function Home() {
   const [trending, setTrending] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 400);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -42,17 +51,26 @@ export default function Home() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-zinc-950 via-zinc-900 to-black flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500 mx-auto mb-4"></div>
-          <p className="text-zinc-400">Loading movies...</p>
+          <div className="relative inline-block">
+            <div className="w-16 h-16 border-4 border-slate-700 border-t-cyan-500 rounded-full animate-spin"></div>
+            <Film className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-cyan-400 animate-pulse" size={24} />
+          </div>
+          <p className="text-slate-400 mt-4 animate-pulse">Loading amazing movies...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 relative">
+      {/* Grid pattern overlay */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.02]" style={{
+        backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)',
+        backgroundSize: '50px 50px'
+      }} />
+      
       {/* Animated background particles */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
@@ -128,6 +146,21 @@ export default function Home() {
               <p className="text-base md:text-lg text-slate-400 animate-in fade-in slide-in-from-bottom duration-700" style={{ animationDelay: '100ms' }}>
                 Explore thousands of movies, get AI-powered recommendations, and never miss a great film.
               </p>
+              {/* Stats */}
+              <div className="flex flex-wrap gap-6 mt-6 animate-in fade-in slide-in-from-bottom duration-700" style={{ animationDelay: '200ms' }}>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm text-slate-500">500K+ Movies</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+                  <span className="text-sm text-slate-500">AI-Powered</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
+                  <span className="text-sm text-slate-500">Updated Daily</span>
+                </div>
+              </div>
             </section>
 
             {/* AI Search Bar */}
@@ -149,7 +182,17 @@ export default function Home() {
           {/* Now Playing Section */}
           <section className="mb-12">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-xl md:text-2xl font-bold text-white">Now Playing</h3>
+              <div>
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-1">Now Playing</h3>
+                <p className="text-xs text-slate-500">In theaters now</p>
+              </div>
+              <button 
+                onClick={() => router.push('/movies?category=now_playing')}
+                className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors duration-300 flex items-center gap-1 group"
+              >
+                View All
+                <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
+              </button>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
@@ -174,7 +217,17 @@ export default function Home() {
           {/* Trending Section */}
           <section className="mb-12">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-xl md:text-2xl font-bold text-white">Trending This Week</h3>
+              <div>
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-1">Trending This Week</h3>
+                <p className="text-xs text-slate-500">Most popular movies right now</p>
+              </div>
+              <button 
+                onClick={() => router.push('/movies?category=popular')}
+                className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors duration-300 flex items-center gap-1 group"
+              >
+                View All
+                <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
+              </button>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
@@ -251,6 +304,17 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Scroll to Top Button */}
+      {showScrollTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="fixed bottom-8 right-8 p-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-full shadow-lg shadow-cyan-500/30 hover:shadow-xl hover:shadow-cyan-500/40 hover:scale-110 transition-all duration-300 z-50 group"
+          aria-label="Scroll to top"
+        >
+          <ArrowUp size={20} className="group-hover:-translate-y-1 transition-transform duration-300" />
+        </button>
+      )}
     </div>
   );
 }
