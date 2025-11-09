@@ -63,20 +63,58 @@ export default function StatusPage() {
     setResults([...testResults]);
 
     // Test 3: Check Image Loading
+    // First, get a real movie poster path from the API to test with
     try {
-      const response = await fetch('https://image.tmdb.org/t/p/w500/test.jpg', {
-        method: 'HEAD',
-      });
-      testResults.push({
-        name: 'Image CDN',
-        status: 'success',
-        message: 'TMDB image CDN is accessible',
-      });
-    } catch (error) {
+      const trendingResponse = await tmdbApi.getTrending('week');
+      const firstMovie = trendingResponse.results[0];
+      
+      if (firstMovie?.poster_path) {
+        // Test loading an actual TMDB image
+        await new Promise<void>((resolve, reject) => {
+          const img = new Image();
+          let settled = false;
+          const timeout = setTimeout(() => {
+            if (!settled) {
+              settled = true;
+              reject(new Error('Image load timeout'));
+            }
+          }, 8000);
+
+          img.onload = () => {
+            if (!settled) {
+              settled = true;
+              clearTimeout(timeout);
+              resolve();
+            }
+          };
+          img.onerror = () => {
+            if (!settled) {
+              settled = true;
+              clearTimeout(timeout);
+              reject(new Error('Image failed to load'));
+            }
+          };
+
+          // Use a real poster path from TMDB
+          img.src = `https://image.tmdb.org/t/p/w92${firstMovie.poster_path}`;
+        });
+
+        testResults.push({
+          name: 'Image CDN',
+          status: 'success',
+          message: 'TMDB image CDN is accessible and images load successfully',
+        });
+      } else {
+        throw new Error('No poster path available to test');
+      }
+    } catch (error: any) {
       testResults.push({
         name: 'Image CDN',
         status: 'error',
-        message: 'Unable to connect to TMDB image CDN. Check your internet connection',
+        message:
+          error?.message?.includes('timeout') || error?.message?.includes('failed to load')
+            ? 'Unable to load images from TMDB CDN. Check your internet connection or firewall settings.'
+            : 'Unable to test image CDN (API may have failed)',
       });
     }
     setResults([...testResults]);
