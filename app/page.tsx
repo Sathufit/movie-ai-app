@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import SearchBar from '@/components/SearchBar';
 import AISearchBar from '@/components/AISearchBar';
 import MovieCard from '@/components/MovieCard';
-import { Film, Sparkles } from 'lucide-react';
+import { Film, Sparkles, Menu, X } from 'lucide-react';
 import { tmdbApi, Movie } from '../lib/tmdb';
 
 export default function Home() {
@@ -13,6 +13,7 @@ export default function Home() {
   const [nowPlaying, setNowPlaying] = useState<Movie[]>([]);
   const [trending, setTrending] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -67,6 +68,8 @@ export default function Home() {
                   MovieAI
                 </h1>
               </div>
+              
+              {/* Desktop Navigation */}
               <nav className="hidden md:flex gap-6 text-sm text-zinc-400" aria-label="Main navigation">
                 <button onClick={() => router.push('/')} className="hover:text-white transition-colors">
                   Home
@@ -76,7 +79,48 @@ export default function Home() {
                 </button>
                 <button className="hover:text-white transition-colors">AI Features</button>
               </nav>
+              
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="md:hidden text-white p-2 hover:bg-zinc-800 rounded-lg transition-colors"
+                aria-label="Toggle menu"
+              >
+                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
             </div>
+            
+            {/* Mobile Navigation Menu */}
+            {mobileMenuOpen && (
+              <div className="md:hidden mb-6 bg-zinc-900/95 backdrop-blur-sm border border-zinc-800 rounded-xl p-4 animate-in slide-in-from-top">
+                <nav className="flex flex-col gap-3">
+                  <button
+                    onClick={() => {
+                      router.push('/');
+                      setMobileMenuOpen(false);
+                    }}
+                    className="text-left text-zinc-300 hover:text-white px-4 py-2 hover:bg-zinc-800 rounded-lg transition-colors"
+                  >
+                    Home
+                  </button>
+                  <button
+                    onClick={() => {
+                      router.push('/status');
+                      setMobileMenuOpen(false);
+                    }}
+                    className="text-left text-zinc-300 hover:text-white px-4 py-2 hover:bg-zinc-800 rounded-lg transition-colors"
+                  >
+                    Status
+                  </button>
+                  <button
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="text-left text-zinc-300 hover:text-white px-4 py-2 hover:bg-zinc-800 rounded-lg transition-colors"
+                  >
+                    AI Features
+                  </button>
+                </nav>
+              </div>
+            )}
 
             {/* Hero Text */}
             <section className="max-w-3xl mb-8">

@@ -176,7 +176,7 @@ export default function MovieDetailsPage({ params }: PageProps) {
       />
       
       {/* Hero Section with Backdrop */}
-      <div className="relative h-[60vh] md:h-[70vh]">
+      <div className="relative h-[50vh] sm:h-[60vh] md:h-[70vh]">
         <div className="absolute inset-0">
           <Image
             src={getImageUrl(movie.backdrop_path, 'w1280')}
@@ -194,33 +194,32 @@ export default function MovieDetailsPage({ params }: PageProps) {
         {/* Back Button */}
         <button
           onClick={() => router.back()}
-          className="absolute top-8 left-8 z-10 bg-black/50 backdrop-blur-sm text-white p-3 rounded-full hover:bg-black/70 transition-colors"
+          className="absolute top-4 left-4 md:top-8 md:left-8 z-10 bg-black/50 backdrop-blur-sm text-white p-2 md:p-3 rounded-full hover:bg-black/70 transition-colors"
         >
-          <ArrowLeft className="w-6 h-6" />
+          <ArrowLeft className="w-5 h-5 md:w-6 md:h-6" />
         </button>
 
         {/* Actions */}
-        <div className="absolute top-8 right-8 z-10 flex gap-3">
-          <button className="bg-black/50 backdrop-blur-sm text-white p-3 rounded-full hover:bg-black/70 transition-colors">
-            <Heart className="w-6 h-6" />
+        <div className="absolute top-4 right-4 md:top-8 md:right-8 z-10 flex gap-2 md:gap-3">
+          <button className="bg-black/50 backdrop-blur-sm text-white p-2 md:p-3 rounded-full hover:bg-black/70 transition-colors">
+            <Heart className="w-5 h-5 md:w-6 md:h-6" />
           </button>
-          <button className="bg-black/50 backdrop-blur-sm text-white p-3 rounded-full hover:bg-black/70 transition-colors">
-            <Share2 className="w-6 h-6" />
+          <button className="bg-black/50 backdrop-blur-sm text-white p-2 md:p-3 rounded-full hover:bg-black/70 transition-colors">
+            <Share2 className="w-5 h-5 md:w-6 md:h-6" />
           </button>
         </div>
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 -mt-32 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="container mx-auto px-4 -mt-20 sm:-mt-32 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           {/* Poster */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="lg:col-span-1"
-          >
-            <div className="relative aspect-[2/3] rounded-2xl overflow-hidden shadow-2xl">
+            className="lg:col-span-1">
+            <div className="relative aspect-[2/3] max-w-xs mx-auto lg:max-w-none rounded-2xl overflow-hidden shadow-2xl">
               <Image
                 src={getImageUrl(movie.poster_path, 'w500')}
                 alt={movie.title}
@@ -238,14 +237,14 @@ export default function MovieDetailsPage({ params }: PageProps) {
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.2 }}>
               {/* Title & Rating */}
               <div className="mb-6">
-                <h1 className="text-4xl md:text-6xl font-bold text-white mb-2">{movie.title}</h1>
-                {movie.tagline && <p className="text-xl text-zinc-400 italic mb-4">"{movie.tagline}"</p>}
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-2 leading-tight">{movie.title}</h1>
+                {movie.tagline && <p className="text-lg md:text-xl text-zinc-400 italic mb-4">"{movie.tagline}"</p>}
 
-                <div className="flex flex-wrap items-center gap-4">
-                  <div className="flex items-center gap-2 bg-yellow-500/20 px-4 py-2 rounded-full">
-                    <Star className="w-5 h-5 text-yellow-400" fill="currentColor" />
-                    <span className="text-white font-bold">{movie.vote_average.toFixed(1)}</span>
-                    <span className="text-zinc-400 text-sm">({movie.vote_count.toLocaleString()} votes)</span>
+                <div className="flex flex-wrap items-center gap-3 md:gap-4">
+                  <div className="flex items-center gap-2 bg-yellow-500/20 px-3 md:px-4 py-2 rounded-full">
+                    <Star className="w-4 h-4 md:w-5 md:h-5 text-yellow-400" fill="currentColor" />
+                    <span className="text-white font-bold text-sm md:text-base">{movie.vote_average.toFixed(1)}</span>
+                    <span className="text-zinc-400 text-xs md:text-sm">({movie.vote_count.toLocaleString()} votes)</span>
                   </div>
 
                   <div className="flex items-center gap-2 text-zinc-400">
@@ -276,35 +275,35 @@ export default function MovieDetailsPage({ params }: PageProps) {
               {trailer && (
                 <button
                   onClick={() => window.open(`https://www.youtube.com/watch?v=${trailer.key}`, '_blank')}
-                  className="flex items-center gap-3 bg-gradient-to-r from-purple-600 to-red-600 hover:from-purple-700 hover:to-red-700 text-white font-semibold px-8 py-4 rounded-full transition-all duration-300 transform hover:scale-105 mb-6"
+                  className="flex items-center justify-center gap-2 md:gap-3 bg-gradient-to-r from-purple-600 to-red-600 hover:from-purple-700 hover:to-red-700 text-white font-semibold px-6 md:px-8 py-3 md:py-4 rounded-full transition-all duration-300 transform hover:scale-105 mb-6 w-full sm:w-auto text-sm md:text-base"
                 >
-                  <Play className="w-6 h-6" fill="currentColor" />
+                  <Play className="w-5 h-5 md:w-6 md:h-6" fill="currentColor" />
                   Watch Trailer
                 </button>
               )}
 
               {/* Overview */}
               <div className="mb-6">
-                <h2 className="text-2xl font-bold text-white mb-3">Overview</h2>
-                <p className="text-zinc-300 text-lg leading-relaxed">{movie.overview}</p>
+                <h2 className="text-xl md:text-2xl font-bold text-white mb-3">Overview</h2>
+                <p className="text-zinc-300 text-base md:text-lg leading-relaxed">{movie.overview}</p>
               </div>
 
               {/* AI Summary */}
-              <div className="bg-gradient-to-r from-purple-900/30 to-red-900/30 border border-purple-500/20 rounded-xl p-6 mb-6">
+              <div className="bg-gradient-to-r from-purple-900/30 to-red-900/30 border border-purple-500/20 rounded-xl p-4 md:p-6 mb-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <Sparkles className="w-5 h-5 text-purple-400" />
-                  <h2 className="text-xl font-bold text-white">AI-Generated Summary</h2>
+                  <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-purple-400" />
+                  <h2 className="text-lg md:text-xl font-bold text-white">AI-Generated Summary</h2>
                 </div>
 
                 {aiSummary ? (
-                  <p className="text-zinc-300 leading-relaxed">{aiSummary}</p>
+                  <p className="text-zinc-300 leading-relaxed text-sm md:text-base">{aiSummary}</p>
                 ) : (
                   <div>
-                    <p className="text-zinc-400 mb-3">Get an AI-powered concise summary of this movie.</p>
+                    <p className="text-zinc-400 mb-3 text-sm md:text-base">Get an AI-powered concise summary of this movie.</p>
                     <button
                       onClick={handleAISummary}
                       disabled={loadingAI}
-                      className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-2 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-4 md:px-6 py-2 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base w-full sm:w-auto"
                     >
                       {loadingAI ? 'Generating...' : 'Generate AI Summary'}
                     </button>
@@ -313,15 +312,15 @@ export default function MovieDetailsPage({ params }: PageProps) {
               </div>
 
               {/* AI Chat Interface */}
-              <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-500/20 rounded-xl p-6 mb-6">
+              <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-500/20 rounded-xl p-4 md:p-6 mb-6">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
-                    <MessageCircle className="w-5 h-5 text-blue-400" />
-                    <h2 className="text-xl font-bold text-white">Chat About This Movie</h2>
+                    <MessageCircle className="w-4 h-4 md:w-5 md:h-5 text-blue-400" />
+                    <h2 className="text-lg md:text-xl font-bold text-white">Chat About This Movie</h2>
                   </div>
                   <button
                     onClick={() => setShowChat(!showChat)}
-                    className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
+                    className="text-xs md:text-sm text-blue-400 hover:text-blue-300 transition-colors"
                   >
                     {showChat ? 'Hide Chat' : 'Start Chat'}
                   </button>
