@@ -39,10 +39,10 @@ export default function MovieCard({ movie, index, onClick }: MovieCardProps) {
       transition={{ duration: 0.5, delay: index * 0.1 }}
       whileHover={{ y: -8 }}
       onClick={onClick}
-      className="group relative bg-zinc-900/50 rounded-xl overflow-hidden border border-zinc-800/50 hover:border-purple-500/50 transition-all duration-300 backdrop-blur-sm cursor-pointer"
+      className="group relative bg-slate-900/50 rounded-xl overflow-hidden border border-slate-800/50 hover:border-cyan-500/50 transition-all duration-300 backdrop-blur-sm cursor-pointer"
     >
       {/* Movie Poster */}
-      <div className="relative aspect-[2/3] overflow-hidden bg-zinc-800">
+      <div className="relative aspect-[2/3] overflow-hidden bg-slate-800">
         <Image
           src={posterUrl}
           alt={movie.title}
@@ -56,11 +56,11 @@ export default function MovieCard({ movie, index, onClick }: MovieCardProps) {
 
         {/* Hover Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="absolute bottom-0 left-0 right-0 p-4">
-            <p className="text-sm text-zinc-300 line-clamp-3 mb-3">
+          <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4">
+            <p className="text-xs md:text-sm text-slate-300 line-clamp-3 mb-2 md:mb-3">
               {movie.description}
             </p>
-            <button className="flex items-center gap-2 bg-white/90 hover:bg-white text-black font-semibold px-4 py-2 rounded-full text-sm transition-colors w-full justify-center">
+            <button className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm transition-colors w-full justify-center shadow-lg shadow-cyan-500/30">
               View Details
             </button>
           </div>
@@ -76,19 +76,19 @@ export default function MovieCard({ movie, index, onClick }: MovieCardProps) {
       </div>
 
       {/* Movie Info */}
-      <div className="p-4">
-        <h4 className="text-lg font-bold text-white mb-2 line-clamp-1 group-hover:text-purple-400 transition-colors">
+      <div className="p-3 md:p-4">
+        <h4 className="text-sm md:text-base lg:text-lg font-bold text-white mb-1.5 md:mb-2 line-clamp-1 group-hover:text-cyan-400 transition-colors">
           {movie.title}
         </h4>
-        <div className="flex items-center gap-2 text-sm text-zinc-400">
-          <Calendar className="w-4 h-4" />
+        <div className="flex items-center gap-1.5 md:gap-2 text-xs md:text-sm text-slate-400">
+          <Calendar className="w-3 h-3 md:w-4 md:h-4" />
           <span>{formatDate(movie.releaseDate)}</span>
         </div>
       </div>
 
       {/* Glow Effect on Hover */}
       <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-t from-purple-600/20 to-transparent rounded-xl" />
+        <div className="absolute inset-0 bg-gradient-to-t from-cyan-600/20 to-transparent rounded-xl" />
       </div>
     </motion.div>
   );
