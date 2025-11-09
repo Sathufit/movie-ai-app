@@ -158,47 +158,53 @@ export default function MoviesPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-zinc-950 via-purple-950/20 to-zinc-950">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+      {/* Animated background particles */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 right-20 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-40 left-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+      </div>
+
       {/* Header */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-zinc-950/80 border-b border-zinc-800">
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-slate-950/90 border-b border-slate-800/50 shadow-lg shadow-cyan-500/5">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
             {/* Logo and Navigation */}
             <div className="flex items-center gap-6">
               <button
                 onClick={() => router.push('/')}
-                className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+                className="flex items-center gap-3 hover:opacity-80 transition-all duration-300 group"
               >
-                <div className="bg-gradient-to-br from-purple-600 to-red-600 p-2 rounded-xl">
+                <div className="bg-gradient-to-br from-cyan-500 to-blue-600 p-2 rounded-xl group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-cyan-500/30">
                   <Film className="w-5 h-5 md:w-6 md:h-6 text-white" />
                 </div>
-                <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+                <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
                   MovieAI
                 </h1>
               </button>
 
               {/* Desktop Navigation */}
-              <nav className="hidden md:flex items-center gap-4 text-sm text-zinc-400">
+              <nav className="hidden md:flex items-center gap-4 text-sm text-slate-400">
                 <button 
                   onClick={() => router.push('/')} 
-                  className="hover:text-white transition-colors"
+                  className="hover:text-cyan-400 transition-colors duration-300"
                 >
                   Home
                 </button>
-                <span className="text-zinc-700">|</span>
-                <span className="text-purple-400 font-medium">Browse Movies</span>
+                <span className="text-slate-700">|</span>
+                <span className="text-cyan-400 font-medium">Browse Movies</span>
               </nav>
             </div>
 
             <div className="flex items-center gap-2">
               {/* View Toggle */}
-              <div className="hidden sm:flex items-center gap-1 bg-zinc-900/50 rounded-lg p-1">
+              <div className="hidden sm:flex items-center gap-1 bg-slate-900/50 rounded-lg p-1 border border-slate-800">
                 <button
                   onClick={() => setViewType('grid')}
-                  className={`p-2 rounded transition-colors ${
+                  className={`p-2 rounded transition-all duration-300 ${
                     viewType === 'grid'
-                      ? 'bg-purple-500/20 text-purple-400'
-                      : 'text-zinc-500 hover:text-zinc-300'
+                      ? 'bg-cyan-500/20 text-cyan-400'
+                      : 'text-slate-500 hover:text-slate-300'
                   }`}
                   title="Grid View"
                 >
@@ -206,10 +212,10 @@ export default function MoviesPage() {
                 </button>
                 <button
                   onClick={() => setViewType('list')}
-                  className={`p-2 rounded transition-colors ${
+                  className={`p-2 rounded transition-all duration-300 ${
                     viewType === 'list'
-                      ? 'bg-purple-500/20 text-purple-400'
-                      : 'text-zinc-500 hover:text-zinc-300'
+                      ? 'bg-cyan-500/20 text-cyan-400'
+                      : 'text-slate-500 hover:text-slate-300'
                   }`}
                   title="List View"
                 >
@@ -220,16 +226,16 @@ export default function MoviesPage() {
               {/* Filter Toggle */}
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${
                   showFilters
-                    ? 'bg-purple-500/20 text-purple-400'
-                    : 'bg-zinc-900/50 text-zinc-400 hover:bg-zinc-800'
+                    ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                    : 'bg-slate-900/50 text-slate-400 hover:bg-slate-800 border border-slate-800'
                 }`}
               >
                 <Filter size={18} />
                 <span className="hidden sm:inline">Filters</span>
                 {(selectedGenres.length > 0 || minRating > 0) && (
-                  <span className="flex items-center justify-center w-5 h-5 bg-purple-500 text-white text-xs rounded-full">
+                  <span className="flex items-center justify-center w-5 h-5 bg-cyan-500 text-white text-xs rounded-full animate-pulse">
                     {selectedGenres.length + (minRating > 0 ? 1 : 0)}
                   </span>
                 )}
@@ -239,9 +245,9 @@ export default function MoviesPage() {
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6 md:py-8 relative">
         {/* Categories */}
-        <div className="flex flex-wrap gap-3 mb-8">
+        <div className="flex flex-wrap gap-2 mb-6">
           {categories.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
@@ -249,14 +255,14 @@ export default function MoviesPage() {
                 setCategory(id as CategoryType);
                 setPage(1);
               }}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
                 category === id
-                  ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/50'
-                  : 'bg-zinc-900/50 text-zinc-400 hover:bg-zinc-800 hover:text-white border border-zinc-800'
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30 scale-105'
+                  : 'bg-slate-900/50 text-slate-400 hover:bg-slate-800 hover:text-white border border-slate-800 hover:border-slate-700'
               }`}
             >
-              <Icon size={18} />
-              <span className="hidden sm:inline">{label}</span>
+              <Icon size={16} />
+              <span>{label}</span>
             </button>
           ))}
         </div>
@@ -269,33 +275,33 @@ export default function MoviesPage() {
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="overflow-hidden mb-8"
+              className="overflow-hidden mb-6"
             >
-              <div className="bg-zinc-900/50 backdrop-blur-sm rounded-2xl border border-zinc-800 p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-xl font-semibold text-white">Filters</h3>
+              <div className="bg-slate-900/80 backdrop-blur-sm rounded-xl border border-slate-700/50 p-5 shadow-xl shadow-cyan-500/5">
+                <div className="flex items-center justify-between mb-5">
+                  <h3 className="text-lg font-semibold text-white">Filters</h3>
                   {(selectedGenres.length > 0 || minRating > 0) && (
                     <button
                       onClick={clearFilters}
-                      className="flex items-center gap-2 text-sm text-purple-400 hover:text-purple-300 transition-colors"
+                      className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-cyan-400 transition-colors duration-300"
                     >
-                      <X size={16} />
-                      Clear All
+                      <X size={14} />
+                      Clear
                     </button>
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
                   {/* Sort By */}
                   <div>
-                    <label className="block text-sm font-medium text-zinc-400 mb-3">
+                    <label className="block text-xs font-medium text-slate-500 mb-2 uppercase tracking-wide">
                       Sort By
                     </label>
                     <div className="relative">
                       <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value as SortType)}
-                        className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3 text-white appearance-none cursor-pointer hover:border-purple-500 transition-colors"
+                        className="w-full bg-slate-800/80 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white appearance-none cursor-pointer hover:border-cyan-500/50 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300"
                       >
                         {sortOptions.map((option) => (
                           <option key={option.value} value={option.value}>
@@ -303,13 +309,13 @@ export default function MoviesPage() {
                           </option>
                         ))}
                       </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={20} />
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" size={16} />
                     </div>
                   </div>
 
                   {/* Rating Filter */}
                   <div>
-                    <label className="block text-sm font-medium text-zinc-400 mb-3">
+                    <label className="block text-xs font-medium text-slate-500 mb-2 uppercase tracking-wide">
                       Minimum Rating
                     </label>
                     <div className="relative">
@@ -319,7 +325,7 @@ export default function MoviesPage() {
                           setMinRating(Number(e.target.value));
                           setPage(1);
                         }}
-                        className="w-full bg-zinc-800/50 border border-zinc-700 rounded-lg px-4 py-3 text-white appearance-none cursor-pointer hover:border-purple-500 transition-colors"
+                        className="w-full bg-slate-800/80 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white appearance-none cursor-pointer hover:border-cyan-500/50 focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 transition-all duration-300"
                       >
                         {ratingOptions.map((option) => (
                           <option key={option.value} value={option.value}>
@@ -327,25 +333,25 @@ export default function MoviesPage() {
                           </option>
                         ))}
                       </select>
-                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={20} />
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" size={16} />
                     </div>
                   </div>
 
                   {/* Genres */}
                   <div className="lg:col-span-1">
-                    <label className="block text-sm font-medium text-zinc-400 mb-3">
-                      Genres ({selectedGenres.length} selected)
+                    <label className="block text-xs font-medium text-slate-500 mb-2 uppercase tracking-wide">
+                      Genres {selectedGenres.length > 0 && `(${selectedGenres.length})`}
                     </label>
-                    <div className="max-h-[200px] overflow-y-auto custom-scrollbar pr-2">
+                    <div className="max-h-[180px] overflow-y-auto pr-2" style={{ scrollbarWidth: 'thin', scrollbarColor: '#334155 #0f172a' }}>
                       <div className="flex flex-wrap gap-2">
                         {genres.map((genre) => (
                           <button
                             key={genre.id}
                             onClick={() => toggleGenre(genre.id)}
-                            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                            className={`px-3 py-1 rounded text-xs font-medium transition-all duration-300 ${
                               selectedGenres.includes(genre.id)
-                                ? 'bg-purple-500 text-white shadow-lg shadow-purple-500/30'
-                                : 'bg-zinc-800/50 text-zinc-400 hover:bg-zinc-700 hover:text-white border border-zinc-700'
+                                ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30'
+                                : 'bg-slate-800/80 text-slate-400 hover:bg-slate-700 hover:text-white border border-slate-700'
                             }`}
                           >
                             {genre.name}
@@ -362,20 +368,19 @@ export default function MoviesPage() {
 
         {/* Loading State */}
         {loading ? (
-          <div className="flex items-center justify-center py-20">
+          <div className="flex items-center justify-center py-16">
             <div className="relative">
-              <div className="w-16 h-16 border-4 border-purple-500/30 border-t-purple-500 rounded-full animate-spin" />
-              <Film className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-purple-400" size={24} />
+              <div className="w-12 h-12 border-3 border-slate-700 border-t-cyan-500 rounded-full animate-spin" />
             </div>
           </div>
         ) : movies.length === 0 ? (
-          <div className="text-center py-20">
-            <Film className="w-16 h-16 text-zinc-700 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-zinc-400 mb-2">No movies found</h3>
-            <p className="text-zinc-600 mb-6">Try adjusting your filters</p>
+          <div className="text-center py-16">
+            <Film className="w-12 h-12 text-slate-700 mx-auto mb-3" />
+            <h3 className="text-lg font-semibold text-slate-400 mb-1">No movies found</h3>
+            <p className="text-sm text-slate-600 mb-4">Try adjusting your filters</p>
             <button
               onClick={clearFilters}
-              className="px-6 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg transition-colors"
+              className="px-5 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white text-sm rounded-lg transition-all duration-300 shadow-lg shadow-cyan-500/30"
             >
               Clear Filters
             </button>
@@ -414,16 +419,16 @@ export default function MoviesPage() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-2 mt-12">
+              <div className="flex items-center justify-center gap-2 mt-10">
                 <button
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 bg-zinc-900/50 text-zinc-400 rounded-lg hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border border-zinc-800"
+                  className="px-4 py-2 bg-slate-900/80 border border-slate-700 text-slate-400 text-sm rounded-lg hover:bg-slate-800 hover:border-cyan-500/50 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
                 >
                   Previous
                 </button>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
                   {[...Array(Math.min(5, totalPages))].map((_, i) => {
                     let pageNum;
                     if (totalPages <= 5) {
@@ -440,10 +445,10 @@ export default function MoviesPage() {
                       <button
                         key={i}
                         onClick={() => setPage(pageNum)}
-                        className={`w-10 h-10 rounded-lg font-medium transition-all ${
+                        className={`w-9 h-9 rounded-lg text-sm font-medium transition-all duration-300 ${
                           page === pageNum
-                            ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/50'
-                            : 'bg-zinc-900/50 text-zinc-400 hover:bg-zinc-800 border border-zinc-800'
+                            ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg shadow-cyan-500/30'
+                            : 'bg-slate-900/80 border border-slate-700 text-slate-400 hover:bg-slate-800 hover:border-cyan-500/50'
                         }`}
                       >
                         {pageNum}
@@ -455,7 +460,7 @@ export default function MoviesPage() {
                 <button
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   disabled={page === totalPages}
-                  className="px-4 py-2 bg-zinc-900/50 text-zinc-400 rounded-lg hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors border border-zinc-800"
+                  className="px-4 py-2 bg-slate-900/80 border border-slate-700 text-slate-400 text-sm rounded-lg hover:bg-slate-800 hover:border-cyan-500/50 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-300"
                 >
                   Next
                 </button>
@@ -463,29 +468,12 @@ export default function MoviesPage() {
             )}
 
             {/* Results Info */}
-            <p className="text-center text-zinc-500 text-sm mt-8">
-              Showing page {page} of {totalPages}
+            <p className="text-center text-slate-600 text-xs mt-6">
+              Page {page} of {totalPages}
             </p>
           </>
         )}
       </div>
-
-      <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: rgba(39, 39, 42, 0.5);
-          border-radius: 3px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(168, 85, 247, 0.5);
-          border-radius: 3px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(168, 85, 247, 0.7);
-        }
-      `}</style>
     </div>
   );
 }
