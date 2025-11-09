@@ -74,9 +74,6 @@ export default function Home() {
                 <button onClick={() => router.push('/')} className="hover:text-white transition-colors">
                   Home
                 </button>
-                <button onClick={() => router.push('/status')} className="hover:text-white transition-colors">
-                  Status
-                </button>
                 <button className="hover:text-white transition-colors">AI Features</button>
               </nav>
               
@@ -102,21 +99,6 @@ export default function Home() {
                     className="text-left text-zinc-300 hover:text-white px-4 py-2 hover:bg-zinc-800 rounded-lg transition-colors"
                   >
                     Home
-                  </button>
-                  <button
-                    onClick={() => {
-                      router.push('/status');
-                      setMobileMenuOpen(false);
-                    }}
-                    className="text-left text-zinc-300 hover:text-white px-4 py-2 hover:bg-zinc-800 rounded-lg transition-colors"
-                  >
-                    Status
-                  </button>
-                  <button
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="text-left text-zinc-300 hover:text-white px-4 py-2 hover:bg-zinc-800 rounded-lg transition-colors"
-                  >
-                    AI Features
                   </button>
                 </nav>
               </div>
@@ -220,16 +202,10 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-zinc-800 mt-24 py-8">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-center">
             <p className="text-zinc-500 text-sm">
               © 2025 MovieAI. Create by Sathush Nanayakkara.
             </p>
-            <button
-              onClick={() => router.push('/status')}
-              className="text-sm text-zinc-400 hover:text-purple-400 transition-colors"
-            >
-              Check System Status
-            </button>
           </div>
         </div>
       </footer>
