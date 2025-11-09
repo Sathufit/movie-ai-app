@@ -163,12 +163,32 @@ export default function MoviesPage() {
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-zinc-950/80 border-b border-zinc-800">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between gap-4">
-            <button
-              onClick={() => router.push('/')}
-              className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent hover:opacity-80 transition-opacity"
-            >
-              MovieAI
-            </button>
+            {/* Logo and Navigation */}
+            <div className="flex items-center gap-6">
+              <button
+                onClick={() => router.push('/')}
+                className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+              >
+                <div className="bg-gradient-to-br from-purple-600 to-red-600 p-2 rounded-xl">
+                  <Film className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                </div>
+                <h1 className="text-xl md:text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-600 bg-clip-text text-transparent">
+                  MovieAI
+                </h1>
+              </button>
+
+              {/* Desktop Navigation */}
+              <nav className="hidden md:flex items-center gap-4 text-sm text-zinc-400">
+                <button 
+                  onClick={() => router.push('/')} 
+                  className="hover:text-white transition-colors"
+                >
+                  Home
+                </button>
+                <span className="text-zinc-700">|</span>
+                <span className="text-purple-400 font-medium">Browse Movies</span>
+              </nav>
+            </div>
 
             <div className="flex items-center gap-2">
               {/* View Toggle */}
@@ -180,6 +200,7 @@ export default function MoviesPage() {
                       ? 'bg-purple-500/20 text-purple-400'
                       : 'text-zinc-500 hover:text-zinc-300'
                   }`}
+                  title="Grid View"
                 >
                   <Grid3x3 size={18} />
                 </button>
@@ -190,6 +211,7 @@ export default function MoviesPage() {
                       ? 'bg-purple-500/20 text-purple-400'
                       : 'text-zinc-500 hover:text-zinc-300'
                   }`}
+                  title="List View"
                 >
                   <List size={18} />
                 </button>
