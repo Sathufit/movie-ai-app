@@ -17,6 +17,23 @@ export interface Movie {
   genre_ids?: number[];
   genres?: Genre[];
   popularity: number;
+  media_type?: 'movie' | 'tv';
+}
+
+export interface TVShow {
+  id: number;
+  name: string;
+  poster_path: string;
+  backdrop_path: string;
+  overview: string;
+  vote_average: number;
+  vote_count: number;
+  first_air_date: string;
+  genre_ids?: number[];
+  genres?: Genre[];
+  popularity: number;
+  media_type?: 'movie' | 'tv';
+  origin_country?: string[];
 }
 
 export interface MovieDetails extends Movie {
@@ -28,6 +45,27 @@ export interface MovieDetails extends Movie {
   spoken_languages: SpokenLanguage[];
   production_companies: ProductionCompany[];
   production_countries: ProductionCountry[];
+}
+
+export interface TVShowDetails extends TVShow {
+  number_of_seasons: number;
+  number_of_episodes: number;
+  episode_run_time: number[];
+  status: string;
+  tagline: string;
+  spoken_languages: SpokenLanguage[];
+  production_companies: ProductionCompany[];
+  production_countries: ProductionCountry[];
+  created_by: Creator[];
+  last_air_date: string;
+  in_production: boolean;
+  type: string;
+}
+
+export interface Creator {
+  id: number;
+  name: string;
+  profile_path: string | null;
 }
 
 export interface Genre {
@@ -93,6 +131,20 @@ export interface VideosResponse {
 export interface MoviesResponse {
   page: number;
   results: Movie[];
+  total_pages: number;
+  total_results: number;
+}
+
+export interface TVShowsResponse {
+  page: number;
+  results: TVShow[];
+  total_pages: number;
+  total_results: number;
+}
+
+export interface MultiSearchResponse {
+  page: number;
+  results: (Movie | TVShow)[];
   total_pages: number;
   total_results: number;
 }
@@ -197,6 +249,59 @@ class TMDBApi {
 
   async getSimilarMovies(movieId: number): Promise<MoviesResponse> {
     return this.fetchFromTMDB<MoviesResponse>(`/movie/${movieId}/similar`);
+  }
+
+  // TV Show Methods
+  async searchTVShows(query: string, page: number = 1): Promise<TVShowsResponse> {
+    return this.fetchFromTMDB<TVShowsResponse>(
+      `/search/tv?query=${encodeURIComponent(query)}&page=${page}&include_adult=false`
+    );
+  }
+
+  async searchMulti(query: string, page: number = 1): Promise<MultiSearchResponse> {
+    return this.fetchFromTMDB<MultiSearchResponse>(
+      `/search/multi?query=${encodeURIComponent(query)}&page=${page}&include_adult=false`
+    );
+  }
+
+  async getTrendingTV(timeWindow: 'day' | 'week' = 'week'): Promise<TVShowsResponse> {
+    return this.fetchFromTMDB<TVShowsResponse>(`/trending/tv/${timeWindow}`);
+  }
+
+  async getPopularTV(page: number = 1): Promise<TVShowsResponse> {
+    return this.fetchFromTMDB<TVShowsResponse>(`/tv/popular?page=${page}`);
+  }
+
+  async getTopRatedTV(page: number = 1): Promise<TVShowsResponse> {
+    return this.fetchFromTMDB<TVShowsResponse>(`/tv/top_rated?page=${page}`);
+  }
+
+  async getOnTheAirTV(page: number = 1): Promise<TVShowsResponse> {
+    return this.fetchFromTMDB<TVShowsResponse>(`/tv/on_the_air?page=${page}`);
+  }
+
+  async getAiringTodayTV(page: number = 1): Promise<TVShowsResponse> {
+    return this.fetchFromTMDB<TVShowsResponse>(`/tv/airing_today?page=${page}`);
+  }
+
+  async getTVShowDetails(tvId: number): Promise<TVShowDetails> {
+    return this.fetchFromTMDB<TVShowDetails>(`/tv/${tvId}`);
+  }
+
+  async getTVShowCredits(tvId: number): Promise<Credits> {
+    return this.fetchFromTMDB<Credits>(`/tv/${tvId}/credits`);
+  }
+
+  async getTVShowVideos(tvId: number): Promise<VideosResponse> {
+    return this.fetchFromTMDB<VideosResponse>(`/tv/${tvId}/videos`);
+  }
+
+  async getTVShowRecommendations(tvId: number): Promise<TVShowsResponse> {
+    return this.fetchFromTMDB<TVShowsResponse>(`/tv/${tvId}/recommendations`);
+  }
+
+  async getSimilarTVShows(tvId: number): Promise<TVShowsResponse> {
+    return this.fetchFromTMDB<TVShowsResponse>(`/tv/${tvId}/similar`);
   }
 }
 

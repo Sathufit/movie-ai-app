@@ -12,6 +12,7 @@ export default function Home() {
   const router = useRouter();
   const [nowPlaying, setNowPlaying] = useState<Movie[]>([]);
   const [trending, setTrending] = useState<Movie[]>([]);
+  const [trendingTV, setTrendingTV] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -28,13 +29,15 @@ export default function Home() {
     const fetchMovies = async () => {
       try {
         setLoading(true);
-        const [nowPlayingData, trendingData] = await Promise.all([
+        const [nowPlayingData, trendingData, trendingTVData] = await Promise.all([
           tmdbApi.getNowPlaying(),
           tmdbApi.getTrending('week'),
+          tmdbApi.getTrendingTV('week'),
         ]);
 
         setNowPlaying(nowPlayingData.results.slice(0, 8));
         setTrending(trendingData.results.slice(0, 8));
+        setTrendingTV(trendingTVData.results.slice(0, 8));
       } catch (error) {
         console.error('Error fetching movies:', error);
       } finally {
@@ -47,6 +50,10 @@ export default function Home() {
 
   const handleMovieClick = (id: number) => {
     router.push(`/movie/${id}`);
+  };
+
+  const handleTVShowClick = (id: number) => {
+    router.push(`/tv/${id}`);
   };
 
   if (loading) {
@@ -97,8 +104,8 @@ export default function Home() {
                 <button onClick={() => router.push('/')} className="hover:text-cyan-400 transition-colors duration-300">
                   Home
                 </button>
-                <button onClick={() => router.push('/movies')} className="hover:text-cyan-400 transition-colors duration-300">
-                  Browse Movies
+                <button onClick={() => router.push('/browse')} className="hover:text-cyan-400 transition-colors duration-300">
+                  Browse
                 </button>
               </nav>
               
@@ -127,12 +134,12 @@ export default function Home() {
                   </button>
                   <button
                     onClick={() => {
-                      router.push('/movies');
+                      router.push('/browse');
                       setMobileMenuOpen(false);
                     }}
                     className="text-left text-slate-300 hover:text-cyan-400 px-4 py-2 hover:bg-slate-800/50 rounded-lg transition-all duration-300"
                   >
-                    Browse Movies
+                    Browse
                   </button>
                 </nav>
               </div>
@@ -218,11 +225,11 @@ export default function Home() {
           <section className="mb-12">
             <div className="flex items-center justify-between mb-5">
               <div>
-                <h3 className="text-xl md:text-2xl font-bold text-white mb-1">Trending This Week</h3>
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-1">Trending Movies This Week</h3>
                 <p className="text-xs text-slate-500">Most popular movies right now</p>
               </div>
               <button 
-                onClick={() => router.push('/movies?category=popular')}
+                onClick={() => router.push('/browse?type=movie&category=popular')}
                 className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors duration-300 flex items-center gap-1 group"
               >
                 View All
@@ -249,7 +256,42 @@ export default function Home() {
             </div>
           </section>
 
-          {/* Browse All Movies CTA */}
+          {/* Trending TV Shows Section */}
+          <section className="mb-12">
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-1">Trending TV Shows This Week</h3>
+                <p className="text-xs text-slate-500">Most popular TV shows right now</p>
+              </div>
+              <button 
+                onClick={() => router.push('/browse?type=tv&category=popular')}
+                className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors duration-300 flex items-center gap-1 group"
+              >
+                View All
+                <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {trendingTV.map((show, index) => (
+                <MovieCard
+                  key={show.id}
+                  movie={{
+                    id: show.id,
+                    title: show.name,
+                    poster: show.poster_path,
+                    rating: show.vote_average,
+                    releaseDate: show.first_air_date,
+                    description: show.overview,
+                  }}
+                  index={index}
+                  onClick={() => handleTVShowClick(show.id)}
+                />
+              ))}
+            </div>
+          </section>
+
+          {/* Browse All CTA */}
           <section className="mb-12 group">
             <div className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 border border-slate-700/50 rounded-xl p-8 md:p-10 text-center backdrop-blur-sm relative overflow-hidden transition-all duration-500 hover:border-cyan-500/50 hover:shadow-2xl hover:shadow-cyan-500/10">
               {/* Animated gradient overlay */}
@@ -260,17 +302,17 @@ export default function Home() {
                   <Film className="w-12 h-12 text-cyan-400" />
                 </div>
                 <h3 className="text-xl md:text-2xl font-bold text-white mb-3">
-                  Discover Thousands of Movies
+                  Discover Movies & TV Shows
                 </h3>
                 <p className="text-sm md:text-base text-slate-400 mb-5 max-w-xl mx-auto">
-                  Browse our complete collection with advanced filters by genre, rating, and release date.
+                  Browse our complete collection of movies and TV shows with advanced filters by genre, rating, and release date.
                 </p>
                 <button
-                  onClick={() => router.push('/movies')}
+                  onClick={() => router.push('/browse')}
                   className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium rounded-lg transition-all duration-300 shadow-lg shadow-cyan-500/30 hover:shadow-xl hover:shadow-cyan-500/40 hover:scale-105"
                 >
                   <Film size={18} />
-                  Browse All Movies
+                  Browse All Content
                 </button>
               </div>
             </div>
