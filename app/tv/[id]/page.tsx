@@ -28,6 +28,7 @@ import {
 } from '@/lib/tmdb';
 import { geminiService } from '@/lib/gemini';
 import MediaCard from '@/components/MediaCard';
+import VideoPlayerModal from '@/components/VideoPlayerModal';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -44,6 +45,8 @@ export default function TVShowDetailsPage({ params }: PageProps) {
   const [loading, setLoading] = useState(true);
   const [loadingAI, setLoadingAI] = useState(false);
   
+  const [showPlayer, setShowPlayer] = useState(false);
+
   // Chat state
   const [showChat, setShowChat] = useState(false);
   const [chatMessages, setChatMessages] = useState<Array<{ role: string; text: string }>>([]);
@@ -145,6 +148,16 @@ export default function TVShowDetailsPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+      {/* Video Player Modal */}
+      {showPlayer && (
+        <VideoPlayerModal
+          tmdbId={show.id}
+          title={show.name}
+          mediaType="tv"
+          onClose={() => setShowPlayer(false)}
+        />
+      )}
+
       {/* Hero Section with Backdrop */}
       <div className="relative h-[50vh] sm:h-[60vh] md:h-[70vh]">
         <div className="absolute inset-0">
@@ -259,16 +272,25 @@ export default function TVShowDetailsPage({ params }: PageProps) {
                 </div>
               </div>
 
-              {/* Trailer Button */}
-              {trailer && (
+              {/* Watch & Trailer Buttons */}
+              <div className="flex flex-wrap gap-3 mb-6">
                 <button
-                  onClick={() => window.open(`https://www.youtube.com/watch?v=${trailer.key}`, '_blank')}
-                  className="flex items-center justify-center gap-2 md:gap-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold px-6 md:px-8 py-3 md:py-4 rounded-full transition-all duration-300 transform hover:scale-105 mb-6 w-full sm:w-auto text-sm md:text-base shadow-lg shadow-cyan-500/30"
+                  onClick={() => setShowPlayer(true)}
+                  className="flex items-center justify-center gap-2 md:gap-3 bg-gradient-to-r from-red-600 to-rose-500 hover:from-red-500 hover:to-rose-400 text-white font-semibold px-6 md:px-8 py-3 md:py-4 rounded-full transition-all duration-300 transform hover:scale-105 w-full sm:w-auto text-sm md:text-base shadow-lg shadow-red-500/30"
                 >
                   <Play className="w-5 h-5 md:w-6 md:h-6" fill="currentColor" />
-                  Watch Trailer
+                  Watch Now
                 </button>
-              )}
+                {trailer && (
+                  <button
+                    onClick={() => window.open(`https://www.youtube.com/watch?v=${trailer.key}`, '_blank')}
+                    className="flex items-center justify-center gap-2 md:gap-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold px-6 md:px-8 py-3 md:py-4 rounded-full transition-all duration-300 transform hover:scale-105 w-full sm:w-auto text-sm md:text-base shadow-lg shadow-cyan-500/30"
+                  >
+                    <Play className="w-5 h-5 md:w-6 md:h-6" fill="currentColor" />
+                    Watch Trailer
+                  </button>
+                )}
+              </div>
 
               {/* Overview */}
               <div className="mb-6">
