@@ -60,12 +60,35 @@ export interface TVShowDetails extends TVShow {
   last_air_date: string;
   in_production: boolean;
   type: string;
+  seasons: Season[];
 }
 
 export interface Creator {
   id: number;
   name: string;
   profile_path: string | null;
+}
+
+export interface Episode {
+  id: number;
+  episode_number: number;
+  name: string;
+  overview: string;
+  still_path: string | null;
+  air_date: string;
+  runtime: number | null;
+  vote_average: number;
+}
+
+export interface Season {
+  id: number;
+  season_number: number;
+  name: string;
+  overview: string;
+  episode_count: number;
+  air_date: string;
+  poster_path: string | null;
+  episodes?: Episode[];
 }
 
 export interface Genre {
@@ -302,6 +325,10 @@ class TMDBApi {
 
   async getSimilarTVShows(tvId: number): Promise<TVShowsResponse> {
     return this.fetchFromTMDB<TVShowsResponse>(`/tv/${tvId}/similar`);
+  }
+
+  async getTVSeasonDetails(tvId: number, seasonNumber: number): Promise<Season> {
+    return this.fetchFromTMDB<Season>(`/tv/${tvId}/season/${seasonNumber}`);
   }
 }
 

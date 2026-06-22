@@ -154,6 +154,7 @@ export default function TVShowDetailsPage({ params }: PageProps) {
           tmdbId={show.id}
           title={show.name}
           mediaType="tv"
+          seasons={show.seasons}
           onClose={() => setShowPlayer(false)}
         />
       )}
