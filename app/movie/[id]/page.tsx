@@ -4,7 +4,6 @@ import { use, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import type { Metadata } from 'next';
 import {
   ArrowLeft,
   Star,
@@ -147,6 +146,11 @@ export default function MovieDetailsPage({ params }: PageProps) {
   const director = credits?.crew.find((person) => person.job === 'Director');
   const mainCast = credits?.cast.slice(0, 6) || [];
 
+  // Only show Watch Now for movies that are actually released
+  const isReleased =
+    movie.status === 'Released' ||
+    (!!movie.release_date && new Date(movie.release_date) <= new Date());
+
   // JSON-LD structured data for SEO
   const movieJsonLd = {
     '@context': 'https://schema.org',
@@ -288,21 +292,34 @@ export default function MovieDetailsPage({ params }: PageProps) {
                 </div>
               </div>
 
-              {/* Watch & Trailer Buttons */}
-              <div className="flex flex-wrap gap-3 mb-6">
-                <button
-                  onClick={() => setShowPlayer(true)}
-                  className="flex items-center justify-center gap-2 md:gap-3 bg-gradient-to-r from-red-600 to-rose-500 hover:from-red-500 hover:to-rose-400 text-white font-semibold px-6 md:px-8 py-3 md:py-4 rounded-full transition-all duration-300 transform hover:scale-105 w-full sm:w-auto text-sm md:text-base shadow-lg shadow-red-500/30"
-                >
-                  <Play className="w-5 h-5 md:w-6 md:h-6" fill="currentColor" />
-                  Watch Now
-                </button>
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3 mb-6">
+                {isReleased ? (
+                  <button
+                    onClick={() => setShowPlayer(true)}
+                    className="group relative flex items-center justify-center gap-2 bg-red-600 hover:bg-red-500 active:bg-red-700 text-white font-bold px-8 py-3.5 rounded-xl transition-all duration-200 shadow-lg shadow-red-600/40 hover:shadow-red-500/50 hover:-translate-y-0.5 active:translate-y-0 text-sm sm:text-base w-full sm:w-auto"
+                  >
+                    <Play className="w-5 h-5" fill="currentColor" />
+                    Watch Now
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-800/60 border border-slate-700 text-slate-400 text-sm w-full sm:w-auto">
+                    <Clock className="w-4 h-4" />
+                    <span>
+                      {movie.status === 'Post Production'
+                        ? 'Coming Soon'
+                        : movie.status === 'In Production'
+                        ? 'In Production'
+                        : 'Not Yet Released'}
+                    </span>
+                  </div>
+                )}
                 {trailer && (
                   <button
                     onClick={() => window.open(`https://www.youtube.com/watch?v=${trailer.key}`, '_blank')}
-                    className="flex items-center justify-center gap-2 md:gap-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold px-6 md:px-8 py-3 md:py-4 rounded-full transition-all duration-300 transform hover:scale-105 w-full sm:w-auto text-sm md:text-base shadow-lg shadow-cyan-500/30"
+                    className="flex items-center justify-center gap-2 bg-white/10 hover:bg-white/15 active:bg-white/5 text-white font-semibold px-6 py-3.5 rounded-xl transition-all duration-200 border border-white/10 hover:border-white/20 text-sm sm:text-base w-full sm:w-auto"
                   >
-                    <Play className="w-5 h-5 md:w-6 md:h-6" fill="currentColor" />
+                    <Play className="w-4 h-4" fill="currentColor" />
                     Watch Trailer
                   </button>
                 )}
