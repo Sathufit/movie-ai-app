@@ -1,9 +1,8 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { Star, Calendar, Tv } from "lucide-react";
-import Image from "next/image";
-import { getImageUrl } from "@/lib/tmdb";
+import Image from 'next/image';
+import { Star, Play, Info, Tv } from 'lucide-react';
+import { getImageUrl } from '@/lib/tmdb';
 
 interface MediaItem {
   id: number;
@@ -19,90 +18,75 @@ interface MediaItem {
 
 interface MediaCardProps {
   media: MediaItem;
-  index: number;
+  index?: number;
   onClick?: () => void;
 }
 
-export default function MediaCard({ media, index, onClick }: MediaCardProps) {
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "Unknown";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-    });
-  };
-
-  const title = media.title || media.name || "Unknown";
-  const date = media.releaseDate || media.firstAirDate || "";
-  const posterUrl = getImageUrl(media.poster, "w500");
+export default function MediaCard({ media, onClick }: MediaCardProps) {
+  const title = media.title || media.name || 'Unknown';
+  const dateStr = media.releaseDate || media.firstAirDate || '';
+  const year = dateStr ? new Date(dateStr).getFullYear() : null;
+  const posterUrl = getImageUrl(media.poster, 'w342');
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      whileHover={{ y: -8 }}
+    <div
       onClick={onClick}
-      className="group relative bg-slate-900/50 rounded-xl overflow-hidden border border-slate-800/50 hover:border-cyan-500/50 transition-all duration-300 backdrop-blur-sm cursor-pointer"
+      className="group relative flex-shrink-0 w-[130px] sm:w-[150px] md:w-[170px] lg:w-[190px] cursor-pointer"
     >
       {/* Poster */}
-      <div className="relative aspect-[2/3] overflow-hidden bg-slate-800">
+      <div className="relative aspect-[2/3] rounded-lg overflow-hidden bg-[#1a1a1a] shadow-lg shadow-black/40">
         <Image
           src={posterUrl}
           alt={title}
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-110"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+          sizes="(max-width: 640px) 130px, (max-width: 768px) 150px, (max-width: 1024px) 170px, 190px"
           onError={(e) => {
-            e.currentTarget.src = "/placeholder-movie.png";
+            e.currentTarget.src = '/placeholder-movie.png';
           }}
         />
 
-        {/* Hover Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4">
-            <p className="text-xs md:text-sm text-slate-300 line-clamp-3 mb-2 md:mb-3">
-              {media.description}
-            </p>
-            <button className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-semibold px-3 md:px-4 py-1.5 md:py-2 rounded-full text-xs md:text-sm transition-colors w-full justify-center shadow-lg shadow-cyan-500/30">
-              View Details
-            </button>
+        {/* Hover overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-black/10 opacity-0 group-hover:opacity-100 transition-all duration-300">
+          {/* Rating */}
+          <div className="absolute top-2.5 left-2.5 flex items-center gap-1 bg-black/70 backdrop-blur-sm rounded-md px-1.5 py-0.5">
+            <Star className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400" />
+            <span className="text-white text-[10px] font-bold">{media.rating.toFixed(1)}</span>
+          </div>
+
+          {/* TV badge */}
+          {media.mediaType === 'tv' && (
+            <div className="absolute top-2.5 right-2.5 bg-[#e50914] rounded px-1.5 py-0.5 flex items-center gap-1">
+              <Tv className="w-2.5 h-2.5 text-white" />
+              <span className="text-[9px] text-white font-bold">TV</span>
+            </div>
+          )}
+
+          {/* Bottom content */}
+          <div className="absolute bottom-0 left-0 right-0 p-2.5">
+            <p className="text-[10px] text-zinc-300 line-clamp-2 mb-2 leading-relaxed">{media.description}</p>
+            <div className="flex gap-1.5">
+              <button className="flex-1 flex items-center justify-center gap-1 bg-white hover:bg-white/90 text-black text-[10px] font-bold py-1.5 rounded-md transition-colors">
+                <Play className="w-2.5 h-2.5 fill-black" />
+                Play
+              </button>
+              <button className="flex items-center justify-center bg-white/20 hover:bg-white/30 text-white p-1.5 rounded-md transition-colors border border-white/25">
+                <Info className="w-3 h-3" />
+              </button>
+            </div>
           </div>
         </div>
-
-        {/* Rating Badge */}
-        <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-sm px-2 py-1 rounded-lg flex items-center gap-1">
-          <Star className="w-4 h-4 text-yellow-400" fill="currentColor" />
-          <span className="text-sm font-bold text-white">
-            {media.rating.toFixed(1)}
-          </span>
-        </div>
-
-        {/* Media Type Badge */}
-        {media.mediaType === 'tv' && (
-          <div className="absolute top-3 left-3 bg-cyan-500/90 backdrop-blur-sm px-2 py-1 rounded-lg flex items-center gap-1">
-            <Tv className="w-3 h-3 text-white" />
-            <span className="text-xs font-bold text-white">TV</span>
-          </div>
-        )}
       </div>
 
-      {/* Info */}
-      <div className="p-3 md:p-4">
-        <h4 className="text-sm md:text-base lg:text-lg font-bold text-white mb-1.5 md:mb-2 line-clamp-1 group-hover:text-cyan-400 transition-colors">
+      {/* Card label */}
+      <div className="mt-2 px-0.5">
+        <h4 className="text-xs md:text-sm font-semibold text-zinc-200 line-clamp-1 group-hover:text-white transition-colors duration-200">
           {title}
         </h4>
-        <div className="flex items-center gap-1.5 md:gap-2 text-xs md:text-sm text-slate-400">
-          <Calendar className="w-3 h-3 md:w-4 md:h-4" />
-          <span>{formatDate(date)}</span>
-        </div>
+        {year && (
+          <p className="text-[10px] md:text-xs text-zinc-600 mt-0.5">{year}</p>
+        )}
       </div>
-
-      {/* Glow Effect on Hover */}
-      <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-        <div className="absolute inset-0 bg-gradient-to-t from-cyan-600/20 to-transparent rounded-xl" />
-      </div>
-    </motion.div>
+    </div>
   );
 }

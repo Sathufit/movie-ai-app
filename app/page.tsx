@@ -2,361 +2,262 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import SearchBar from '@/components/SearchBar';
-import AISearchBar from '@/components/AISearchBar';
+import Image from 'next/image';
+import { Play, Info, Star, Film } from 'lucide-react';
+import { tmdbApi, Movie, getImageUrl } from '../lib/tmdb';
+import Navbar from '@/components/Navbar';
+import ContentRow from '@/components/ContentRow';
 import MovieCard from '@/components/MovieCard';
-import { Film, Sparkles, Menu, X, ArrowUp } from 'lucide-react';
-import { tmdbApi, Movie } from '../lib/tmdb';
 
 export default function Home() {
   const router = useRouter();
-  const [nowPlaying, setNowPlaying] = useState<Movie[]>([]);
+  const [featuredMovie, setFeaturedMovie] = useState<Movie | null>(null);
   const [trending, setTrending] = useState<Movie[]>([]);
+  const [nowPlaying, setNowPlaying] = useState<Movie[]>([]);
   const [trendingTV, setTrendingTV] = useState<any[]>([]);
+  const [topRated, setTopRated] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(true);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [heroLoaded, setHeroLoaded] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 400);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const fetchMovies = async () => {
+    const fetchData = async () => {
       try {
-        setLoading(true);
-        const [nowPlayingData, trendingData, trendingTVData] = await Promise.all([
-          tmdbApi.getNowPlaying(),
+        const [trendingData, nowPlayingData, trendingTVData, topRatedData] = await Promise.all([
           tmdbApi.getTrending('week'),
+          tmdbApi.getNowPlaying(),
           tmdbApi.getTrendingTV('week'),
+          tmdbApi.getTopRated(),
         ]);
 
-        setNowPlaying(nowPlayingData.results.slice(0, 8));
-        setTrending(trendingData.results.slice(0, 8));
-        setTrendingTV(trendingTVData.results.slice(0, 8));
-      } catch (error) {
-        console.error('Error fetching movies:', error);
+        const trendingMovies = trendingData.results.slice(0, 20);
+        setTrending(trendingMovies);
+        setNowPlaying(nowPlayingData.results.slice(0, 20));
+        setTrendingTV(trendingTVData.results.slice(0, 20));
+        setTopRated(topRatedData.results.slice(0, 20));
+
+        // Pick a featured movie with a good backdrop from top trending
+        const withBackdrop = trendingMovies.filter((m) => m.backdrop_path);
+        const pick = withBackdrop[Math.floor(Math.random() * Math.min(withBackdrop.length, 5))];
+        setFeaturedMovie(pick || trendingMovies[0]);
+      } catch (err) {
+        console.error('Error fetching data:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchMovies();
+    fetchData();
   }, []);
-
-  const handleMovieClick = (id: number) => {
-    router.push(`/movie/${id}`);
-  };
-
-  const handleTVShowClick = (id: number) => {
-    router.push(`/tv/${id}`);
-  };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
-        <div className="text-center">
-          <div className="relative inline-block">
-            <div className="w-16 h-16 border-4 border-slate-700 border-t-cyan-500 rounded-full animate-spin"></div>
-            <Film className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-cyan-400 animate-pulse" size={24} />
-          </div>
-          <p className="text-slate-400 mt-4 animate-pulse">Loading amazing movies...</p>
+      <div className="min-h-screen bg-[#111111] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-2 border-[#e50914] border-t-transparent rounded-full animate-spin" />
+          <p className="text-zinc-500 text-sm">Loading...</p>
         </div>
       </div>
     );
   }
 
+  const heroYear = featuredMovie?.release_date
+    ? new Date(featuredMovie.release_date).getFullYear()
+    : '';
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 relative">
-      {/* Grid pattern overlay */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.02]" style={{
-        backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)',
-        backgroundSize: '50px 50px'
-      }} />
-      
-      {/* Animated background particles */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
-      </div>
+    <div className="min-h-screen bg-[#111111] text-white">
+      <Navbar isHeroPage={true} />
 
-      <div className="relative">
-        <div className="container mx-auto px-4 py-8 md:py-12">
-          {/* Header */}
-          <header className="mb-12 md:mb-16">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3 cursor-pointer group" onClick={() => router.push('/')}>
-                <div className="bg-gradient-to-br from-cyan-500 to-blue-600 p-2 rounded-xl group-hover:scale-110 transition-transform duration-300 shadow-lg shadow-cyan-500/30">
-                  <Film className="w-6 h-6 md:w-8 md:h-8 text-white" />
+      {/* ── Hero ── */}
+      {featuredMovie && (
+        <section className="relative h-[88vh] min-h-[580px] max-h-[900px]">
+          {/* Backdrop */}
+          <div className="absolute inset-0">
+            <Image
+              src={getImageUrl(featuredMovie.backdrop_path, 'w1280')}
+              alt={featuredMovie.title}
+              fill
+              className={`object-cover transition-opacity duration-700 ${heroLoaded ? 'opacity-100' : 'opacity-0'}`}
+              priority
+              onLoad={() => setHeroLoaded(true)}
+              onError={() => setHeroLoaded(true)}
+            />
+          </div>
+
+          {/* Gradients */}
+          <div className="absolute inset-0 bg-gradient-to-r from-[#111111] via-[#111111]/70 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-transparent to-[#111111]/20" />
+
+          {/* Content */}
+          <div className="relative h-full flex items-end">
+            <div className="max-w-screen-2xl w-full mx-auto px-4 sm:px-6 lg:px-12 pb-20 md:pb-28">
+              <div className="max-w-xl md:max-w-2xl">
+                {/* Meta */}
+                <div className="flex items-center gap-3 mb-3 md:mb-4">
+                  <div className="flex items-center gap-1.5">
+                    <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                    <span className="text-yellow-400 text-sm font-bold">
+                      {featuredMovie.vote_average.toFixed(1)}
+                    </span>
+                  </div>
+                  {heroYear && (
+                    <>
+                      <span className="text-zinc-500">·</span>
+                      <span className="text-zinc-400 text-sm">{heroYear}</span>
+                    </>
+                  )}
                 </div>
-                <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-indigo-400 bg-clip-text text-transparent">
-                  MovieAI
+
+                {/* Title */}
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white mb-4 leading-[1.05] tracking-tight">
+                  {featuredMovie.title}
                 </h1>
-              </div>
-              
-              {/* Desktop Navigation */}
-              <nav className="hidden md:flex gap-6 text-sm text-slate-400" aria-label="Main navigation">
-                <button onClick={() => router.push('/')} className="hover:text-cyan-400 transition-colors duration-300">
-                  Home
-                </button>
-                <button onClick={() => router.push('/browse')} className="hover:text-cyan-400 transition-colors duration-300">
-                  Browse
-                </button>
-              </nav>
-              
-              {/* Mobile Menu Button */}
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden text-white p-2 hover:bg-slate-800 rounded-lg transition-all duration-300 hover:scale-110"
-                aria-label="Toggle menu"
-              >
-                {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
-            </div>
-            
-            {/* Mobile Navigation Menu */}
-            {mobileMenuOpen && (
-              <div className="md:hidden mb-6 bg-slate-900/95 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 shadow-xl shadow-cyan-500/5 animate-in slide-in-from-top">
-                <nav className="flex flex-col gap-3">
-                  <button
-                    onClick={() => {
-                      router.push('/');
-                      setMobileMenuOpen(false);
-                    }}
-                    className="text-left text-slate-300 hover:text-cyan-400 px-4 py-2 hover:bg-slate-800/50 rounded-lg transition-all duration-300"
-                  >
-                    Home
-                  </button>
-                  <button
-                    onClick={() => {
-                      router.push('/browse');
-                      setMobileMenuOpen(false);
-                    }}
-                    className="text-left text-slate-300 hover:text-cyan-400 px-4 py-2 hover:bg-slate-800/50 rounded-lg transition-all duration-300"
-                  >
-                    Browse
-                  </button>
-                </nav>
-              </div>
-            )}
 
-            {/* Hero Text */}
-            <section className="max-w-3xl mb-10">
-              <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight animate-in fade-in slide-in-from-bottom duration-700">
-                Discover Your Next Favorite Movie
-              </h2>
-              <p className="text-base md:text-lg text-slate-400 animate-in fade-in slide-in-from-bottom duration-700" style={{ animationDelay: '100ms' }}>
-                Explore thousands of movies, get AI-powered recommendations, and never miss a great film.
-              </p>
-              {/* Stats */}
-              <div className="flex flex-wrap gap-6 mt-6 animate-in fade-in slide-in-from-bottom duration-700" style={{ animationDelay: '200ms' }}>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm text-slate-500">500K+ Movies</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.5s' }}></div>
-                  <span className="text-sm text-slate-500">AI-Powered</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse" style={{ animationDelay: '1s' }}></div>
-                  <span className="text-sm text-slate-500">Updated Daily</span>
-                </div>
-              </div>
-            </section>
-
-            {/* AI Search Bar */}
-            <div className="mb-5 animate-in fade-in slide-in-from-bottom duration-700" style={{ animationDelay: '200ms' }}>
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="w-4 h-4 text-cyan-400 animate-pulse" />
-                <h3 className="text-sm font-medium text-white">AI-Powered Search</h3>
-              </div>
-              <AISearchBar />
-            </div>
-
-            {/* Regular Search Bar */}
-            <div className="animate-in fade-in slide-in-from-bottom duration-700" style={{ animationDelay: '300ms' }}>
-              <h3 className="text-sm font-medium text-white mb-2">Search by Title</h3>
-              <SearchBar />
-            </div>
-          </header>
-
-          {/* Now Playing Section */}
-          <section className="mb-12">
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <h3 className="text-xl md:text-2xl font-bold text-white mb-1">Now Playing</h3>
-                <p className="text-xs text-slate-500">In theaters now</p>
-              </div>
-              <button 
-                onClick={() => router.push('/movies?category=now_playing')}
-                className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors duration-300 flex items-center gap-1 group"
-              >
-                View All
-                <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-              {nowPlaying.map((movie, index) => (
-                <MovieCard
-                  key={movie.id}
-                  movie={{
-                    id: movie.id,
-                    title: movie.title,
-                    poster: movie.poster_path,
-                    rating: movie.vote_average,
-                    releaseDate: movie.release_date,
-                    description: movie.overview,
-                  }}
-                  index={index}
-                  onClick={() => handleMovieClick(movie.id)}
-                />
-              ))}
-            </div>
-          </section>
-
-          {/* Trending Section */}
-          <section className="mb-12">
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <h3 className="text-xl md:text-2xl font-bold text-white mb-1">Trending Movies This Week</h3>
-                <p className="text-xs text-slate-500">Most popular movies right now</p>
-              </div>
-              <button 
-                onClick={() => router.push('/browse?type=movie&category=popular')}
-                className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors duration-300 flex items-center gap-1 group"
-              >
-                View All
-                <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-              {trending.map((movie, index) => (
-                <MovieCard
-                  key={movie.id}
-                  movie={{
-                    id: movie.id,
-                    title: movie.title,
-                    poster: movie.poster_path,
-                    rating: movie.vote_average,
-                    releaseDate: movie.release_date,
-                    description: movie.overview,
-                  }}
-                  index={index}
-                  onClick={() => handleMovieClick(movie.id)}
-                />
-              ))}
-            </div>
-          </section>
-
-          {/* Trending TV Shows Section */}
-          <section className="mb-12">
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <h3 className="text-xl md:text-2xl font-bold text-white mb-1">Trending TV Shows This Week</h3>
-                <p className="text-xs text-slate-500">Most popular TV shows right now</p>
-              </div>
-              <button 
-                onClick={() => router.push('/browse?type=tv&category=popular')}
-                className="text-sm text-cyan-400 hover:text-cyan-300 transition-colors duration-300 flex items-center gap-1 group"
-              >
-                View All
-                <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-              {trendingTV.map((show, index) => (
-                <MovieCard
-                  key={show.id}
-                  movie={{
-                    id: show.id,
-                    title: show.name,
-                    poster: show.poster_path,
-                    rating: show.vote_average,
-                    releaseDate: show.first_air_date,
-                    description: show.overview,
-                  }}
-                  index={index}
-                  onClick={() => handleTVShowClick(show.id)}
-                />
-              ))}
-            </div>
-          </section>
-
-          {/* Browse All CTA */}
-          <section className="mb-12 group">
-            <div className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 border border-slate-700/50 rounded-xl p-8 md:p-10 text-center backdrop-blur-sm relative overflow-hidden transition-all duration-500 hover:border-cyan-500/50 hover:shadow-2xl hover:shadow-cyan-500/10">
-              {/* Animated gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/5 to-cyan-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              
-              <div className="relative z-10">
-                <div className="inline-block p-3 bg-cyan-500/10 rounded-xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                  <Film className="w-12 h-12 text-cyan-400" />
-                </div>
-                <h3 className="text-xl md:text-2xl font-bold text-white mb-3">
-                  Discover Movies & TV Shows
-                </h3>
-                <p className="text-sm md:text-base text-slate-400 mb-5 max-w-xl mx-auto">
-                  Browse our complete collection of movies and TV shows with advanced filters by genre, rating, and release date.
+                {/* Description */}
+                <p className="text-sm md:text-base text-zinc-300 mb-7 md:mb-8 leading-relaxed line-clamp-3 max-w-lg">
+                  {featuredMovie.overview}
                 </p>
-                <button
-                  onClick={() => router.push('/browse')}
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-medium rounded-lg transition-all duration-300 shadow-lg shadow-cyan-500/30 hover:shadow-xl hover:shadow-cyan-500/40 hover:scale-105"
-                >
-                  <Film size={18} />
-                  Browse All Content
-                </button>
-              </div>
-            </div>
-          </section>
 
-          {/* AI Feature Teaser */}
-          <section className="bg-gradient-to-br from-slate-900/80 to-slate-800/80 border border-slate-700/50 rounded-xl p-8 md:p-10 backdrop-blur-sm hover:border-cyan-500/30 transition-all duration-500">
-            <div className="max-w-2xl">
-              <div className="flex items-center gap-2 mb-3">
-                <Sparkles className="w-5 h-5 text-cyan-400 animate-pulse" />
-                <h3 className="text-xl md:text-2xl font-bold text-white">
-                  AI-Powered Movie Insights
-                </h3>
+                {/* CTA Buttons */}
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={() => router.push(`/movie/${featuredMovie.id}`)}
+                    className="flex items-center gap-2.5 bg-white hover:bg-white/90 text-black font-bold px-7 md:px-9 py-3 md:py-3.5 rounded-lg transition-all duration-200 hover:-translate-y-0.5 shadow-xl text-sm md:text-base"
+                  >
+                    <Play className="w-5 h-5 fill-black" />
+                    Watch Now
+                  </button>
+                  <button
+                    onClick={() => router.push(`/movie/${featuredMovie.id}`)}
+                    className="flex items-center gap-2.5 bg-white/15 hover:bg-white/25 text-white font-semibold px-7 md:px-9 py-3 md:py-3.5 rounded-lg transition-all duration-200 hover:-translate-y-0.5 backdrop-blur-sm border border-white/20 text-sm md:text-base"
+                  >
+                    <Info className="w-5 h-5" />
+                    More Info
+                  </button>
+                </div>
               </div>
-              <p className="text-sm md:text-base text-slate-400">
-                Get instant plot summaries, personalized recommendations, and discover hidden gems with our advanced AI
-                technology powered by Google Gemini.
-              </p>
             </div>
-          </section>
-        </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Content Rows ── */}
+      <div className="pt-8 pb-16">
+        {trending.length > 0 && (
+          <ContentRow
+            title="Trending Now"
+            subtitle="Most popular this week"
+            onViewAll={() => router.push('/browse?type=movie&category=popular')}
+          >
+            {trending.map((movie, i) => (
+              <MovieCard
+                key={movie.id}
+                movie={{
+                  id: movie.id,
+                  title: movie.title,
+                  poster: movie.poster_path,
+                  rating: movie.vote_average,
+                  releaseDate: movie.release_date,
+                  description: movie.overview,
+                }}
+                index={i}
+                onClick={() => router.push(`/movie/${movie.id}`)}
+              />
+            ))}
+          </ContentRow>
+        )}
+
+        {nowPlaying.length > 0 && (
+          <ContentRow
+            title="Now Playing"
+            subtitle="In theaters now"
+            onViewAll={() => router.push('/browse?type=movie&category=now_playing')}
+          >
+            {nowPlaying.map((movie, i) => (
+              <MovieCard
+                key={movie.id}
+                movie={{
+                  id: movie.id,
+                  title: movie.title,
+                  poster: movie.poster_path,
+                  rating: movie.vote_average,
+                  releaseDate: movie.release_date,
+                  description: movie.overview,
+                }}
+                index={i}
+                onClick={() => router.push(`/movie/${movie.id}`)}
+              />
+            ))}
+          </ContentRow>
+        )}
+
+        {trendingTV.length > 0 && (
+          <ContentRow
+            title="Trending TV Shows"
+            subtitle="Most watched series this week"
+            onViewAll={() => router.push('/browse?type=tv&category=popular')}
+          >
+            {trendingTV.map((show, i) => (
+              <MovieCard
+                key={show.id}
+                movie={{
+                  id: show.id,
+                  title: show.name,
+                  poster: show.poster_path,
+                  rating: show.vote_average,
+                  releaseDate: show.first_air_date,
+                  description: show.overview,
+                }}
+                index={i}
+                onClick={() => router.push(`/tv/${show.id}`)}
+              />
+            ))}
+          </ContentRow>
+        )}
+
+        {topRated.length > 0 && (
+          <ContentRow
+            title="Top Rated Movies"
+            subtitle="Critically acclaimed all-time greats"
+            onViewAll={() => router.push('/browse?type=movie&category=top_rated')}
+          >
+            {topRated.map((movie, i) => (
+              <MovieCard
+                key={movie.id}
+                movie={{
+                  id: movie.id,
+                  title: movie.title,
+                  poster: movie.poster_path,
+                  rating: movie.vote_average,
+                  releaseDate: movie.release_date,
+                  description: movie.overview,
+                }}
+                index={i}
+                onClick={() => router.push(`/movie/${movie.id}`)}
+              />
+            ))}
+          </ContentRow>
+        )}
       </div>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-800/50 mt-16 py-6">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4 text-center">
-            <p className="text-slate-600 text-xs">
-              © 2025 MovieAI. Created by Sathush Nanayakkara.
-            </p>
+      {/* ── Footer ── */}
+      <footer className="border-t border-white/5 py-8 px-4 sm:px-6 lg:px-12">
+        <div className="max-w-screen-2xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <div className="bg-[#e50914] p-1.5 rounded-lg">
+              <Film className="w-4 h-4 text-white" />
+            </div>
+            <span className="text-white font-extrabold tracking-tight">MovieAI</span>
+          </div>
+          <p className="text-zinc-600 text-xs text-center">
+            © 2025 MovieAI · Created by Sathush Nanayakkara · Powered by TMDB &amp; Google Gemini
+          </p>
+          <div className="flex items-center gap-4 text-xs text-zinc-600">
+            <button onClick={() => router.push('/browse?type=movie')} className="hover:text-zinc-400 transition-colors">Movies</button>
+            <button onClick={() => router.push('/browse?type=tv')} className="hover:text-zinc-400 transition-colors">TV Shows</button>
           </div>
         </div>
       </footer>
-
-      {/* Scroll to Top Button */}
-      {showScrollTop && (
-        <button
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-8 right-8 p-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-full shadow-lg shadow-cyan-500/30 hover:shadow-xl hover:shadow-cyan-500/40 hover:scale-110 transition-all duration-300 z-50 group"
-          aria-label="Scroll to top"
-        >
-          <ArrowUp size={20} className="group-hover:-translate-y-1 transition-transform duration-300" />
-        </button>
-      )}
     </div>
   );
 }
