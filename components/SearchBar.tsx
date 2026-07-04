@@ -9,13 +9,23 @@ import Image from "next/image";
 
 type SearchResult = (Movie | TVShow) & { media_type?: 'movie' | 'tv' };
 
-export default function SearchBar() {
+interface SearchBarProps {
+  autoFocus?: boolean;
+  onClose?: () => void;
+}
+
+export default function SearchBar({ autoFocus, onClose }: SearchBarProps = {}) {
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const searchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (autoFocus) inputRef.current?.focus();
+  }, [autoFocus]);
 
   const trendingSearches = [
     "Dune: Part Two",
@@ -63,6 +73,7 @@ export default function SearchBar() {
     setQuery("");
     setSearchResults([]);
     setIsFocused(false);
+    onClose?.();
   };
 
   const handleTrendingClick = async (term: string) => {
@@ -84,6 +95,9 @@ export default function SearchBar() {
       setQuery('');
       setSearchResults([]);
       setIsFocused(false);
+      onClose?.();
+    } else if (e.key === 'Escape') {
+      onClose?.();
     }
   };
 
@@ -106,6 +120,7 @@ export default function SearchBar() {
         </div>
 
         <input
+          ref={inputRef}
           type="text"
           placeholder="Search by title — press Enter for full results"
           value={query}

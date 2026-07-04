@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Search, X, Menu, Film } from 'lucide-react';
+import SearchBar from '@/components/SearchBar';
 
 interface NavbarProps {
   isHeroPage?: boolean;
@@ -13,30 +14,13 @@ export default function Navbar({ isHeroPage = false }: NavbarProps) {
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  useEffect(() => {
-    if (searchOpen && searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
-  }, [searchOpen]);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchOpen(false);
-      setSearchQuery('');
-    }
-  };
 
   const isTransparent = isHeroPage && !scrolled;
 
@@ -90,32 +74,19 @@ export default function Navbar({ isHeroPage = false }: NavbarProps) {
           {/* Right side */}
           <div className="flex items-center gap-1 md:gap-2">
             {searchOpen ? (
-              <form onSubmit={handleSearch} className="flex items-center gap-2">
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Escape' && (setSearchOpen(false), setSearchQuery(''))}
-                  placeholder="Search movies, shows..."
-                  className="bg-[#1f1f1f] border border-white/15 focus:border-white/40 text-white placeholder-zinc-500 rounded-lg px-4 py-2 text-sm outline-none w-44 sm:w-56 md:w-72 transition-all duration-200"
-                />
-                <button
-                  type="submit"
-                  className="text-zinc-300 hover:text-white p-2 transition-colors"
-                  aria-label="Search"
-                >
-                  <Search className="w-5 h-5" />
-                </button>
+              <div className="flex items-center gap-2">
+                <div className="w-64 sm:w-80 md:w-96">
+                  <SearchBar autoFocus onClose={() => setSearchOpen(false)} />
+                </div>
                 <button
                   type="button"
-                  onClick={() => { setSearchOpen(false); setSearchQuery(''); }}
-                  className="text-zinc-500 hover:text-white p-2 transition-colors"
+                  onClick={() => setSearchOpen(false)}
+                  className="text-zinc-500 hover:text-white p-2 transition-colors flex-shrink-0"
                   aria-label="Close search"
                 >
                   <X className="w-5 h-5" />
                 </button>
-              </form>
+              </div>
             ) : (
               <button
                 onClick={() => setSearchOpen(true)}
